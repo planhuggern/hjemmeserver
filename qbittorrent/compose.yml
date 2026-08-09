@@ -82,3 +82,35 @@ services:
     volumes:
       - /srv/docker/prowlarr:/config
     restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=Europe/Oslo
+
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Oslo
+
+    volumes:
+      - /srv/docker/sonarr:/config
+      - /srv/storage/downloads:/downloads
+      - /srv/storage/media/tv:/tv
+
+    ports:
+      - "8989:8989"
+
+    restart: unless-stopped
