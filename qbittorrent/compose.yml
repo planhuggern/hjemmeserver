@@ -21,7 +21,7 @@ services:
         until wget -qO- http://127.0.0.1:8080/api/v2/app/version >/dev/null 2>&1;
         do sleep 2; done;
         wget -qO- --post-data
-        "json={\"listen_port\":{{PORT}},\"random_port\":false,\"upnp\":false}"
+        "json={\"listen_port\":{{PORT}},\"random_port\":false,\"upnp\":false,\"current_network_interface\":\"tun0\"}"
         http://127.0.0.1:8080/api/v2/app/setPreferences'
       
       - >-
@@ -29,9 +29,9 @@ services:
         wget -O- -nv --retry-connrefused --post-data
         "json={\"listen_port\":0}"
         http://127.0.0.1:8080/api/v2/app/setPreferences'
-      
       # Tillat qBittorrents webgrensesnitt gjennom Gluetun-brannmuren:
       - FIREWALL_INPUT_PORTS=8080,9696
+      - FIREWALL_OUTBOUND_SUBNETS=10.0.0.0/24
 
     volumes:
       - /srv/docker/gluetun:/gluetun
@@ -76,8 +76,8 @@ services:
     container_name: prowlarr
     network_mode: "service:gluetun"
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=Europe/Oslo
     volumes:
       - /srv/docker/prowlarr:/config
