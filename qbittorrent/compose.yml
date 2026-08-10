@@ -120,3 +120,22 @@ services:
       - "8989:8989"
 
     restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Oslo
+
+    volumes:
+      - /srv/docker/radarr:/config
+      - /srv/storage/downloads:/downloads
+      - /srv/storage/media/movies:/movies
+
+    ports:
+      - "7878:7878"
+
+    restart: unless-stopped
