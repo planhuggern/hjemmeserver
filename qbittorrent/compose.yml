@@ -8,6 +8,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     environment:
       - TZ=Europe/Oslo
+      - QBT_API_KEY=${QBT_API_KEY}
 
       # Fylles inn etter VPN-leverandør:
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
@@ -18,17 +19,22 @@ services:
       - VPN_PORT_FORWARDING=on
       - >-
         VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c '
-        until wget -qO- http://127.0.0.1:8080/api/v2/app/version >/dev/null 2>&1;
+        until wget -qO- --header="Authorization: Bearer ${QBT_API_KEY}"
+        http://127.0.0.1:8080/api/v2/app/version >/dev/null 2>&1;
         do sleep 2; done;
-        wget -qO- --post-data
+        wget -qO-
+        --header="Authorization: Bearer ${QBT_API_KEY}"
+        --post-data
         "json={\"listen_port\":{{PORT}},\"random_port\":false,\"upnp\":false,\"current_network_interface\":\"tun0\"}"
         http://127.0.0.1:8080/api/v2/app/setPreferences'
       
       - >-
         VPN_PORT_FORWARDING_DOWN_COMMAND=/bin/sh -c '
-        wget -O- -nv --retry-connrefused --post-data
+        wget -qO-
+        --header="Authorization: Bearer ${QBT_API_KEY}"
+        --post-data
         "json={\"listen_port\":0}"
-        http://127.0.0.1:8080/api/v2/app/setPreferences'
+        http://127.0.0.1:8080/api/v2/app/setPreferences || true'
       # Tillat qBittorrents webgrensesnitt gjennom Gluetun-brannmuren:
       - FIREWALL_INPUT_PORTS=8080,9696
       - FIREWALL_OUTBOUND_SUBNETS=10.0.0.0/24
